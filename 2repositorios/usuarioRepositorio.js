@@ -1,5 +1,8 @@
 import connection from "../1bancoDeDados/connection.js";
 
+
+
+
 export const allUsers = async () => {
   const [users] = await connection.query("SELECT * FROM usuarios");
   return users;
