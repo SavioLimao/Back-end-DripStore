@@ -1,3 +1,11 @@
+// ESSE ARQUIVO É DESTINADO APENAS PARA TESTES,
+// pode ser deletado sem nenhum problema
+
+
+
+
+
+
 import { PrismaClient } from "@prisma/client";
 
 

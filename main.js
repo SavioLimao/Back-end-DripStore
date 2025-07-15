@@ -1,10 +1,12 @@
 import express from "express"
 import usuarioRotas from "./5rotas/usuarioRotas.js"
+import avaliacoesRotas from "./5rotas/avaliacoesRotas.js"
 
 const app = express()
 app.use(express.json())
 
 app.use("/api",usuarioRotas)
+app.use("/api",avaliacoesRotas)
 
 const PORT = "80"
 // const PORT = 3000

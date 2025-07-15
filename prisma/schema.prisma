@@ -8,11 +8,156 @@ datasource db {
 }
 
 model usuarios {
-  id         Int      @id @default(autoincrement())
-  nome       String
-  cpf        String   @unique
-  email      String   @unique
-  senha      String
-  telefone   String?
-  nascimento DateTime
+  id         Int          @id @default(autoincrement())
+  nome       String?      @db.VarChar(100)
+  cpf        String?      @db.VarChar(20)
+  email      String?      @db.VarChar(50)
+  senha      String?      @db.VarChar(100)
+  telefone   String?      @db.VarChar(20)
+  nascimento DateTime?    @db.Date
+  avaliacoes avaliacoes[]
+  enderecos  enderecos[]
+  pedidos    pedidos[]
+}
+
+model avaliacoes {
+  id          Int       @id @default(autoincrement())
+  comentarios String?   @db.VarChar(255)
+  nota        Float?    @db.Float
+  produto_id  Int?
+  usuario_id  Int?
+  produtos    produtos? @relation(fields: [produto_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "avaliacoes_ibfk_1")
+  usuarios    usuarios? @relation(fields: [usuario_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "avaliacoes_ibfk_2")
+
+  @@index([produto_id], map: "produto_id")
+  @@index([usuario_id], map: "usuario_id")
+}
+
+model categorias {
+  id       Int     @id @default(autoincrement())
+  nome     String? @db.VarChar(100)
+  secao_id Int?
+  img_url  String? @db.VarChar(255)
+  secaos   secaos? @relation(fields: [secao_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "categorias_ibfk_1")
+
+  @@index([secao_id], map: "secao_id")
+}
+
+model enderecos {
+  id                  Int       @id @default(autoincrement())
+  cep                 String?   @db.VarChar(20)
+  rua                 String?   @db.VarChar(100)
+  numero              String?   @db.VarChar(10)
+  cidade              String?   @db.VarChar(50)
+  bairro              String?   @db.VarChar(50)
+  estado              String?   @db.VarChar(3)
+  complemento         String?   @db.VarChar(255)
+  is_delivery_address Boolean?
+  usuario_id          Int?
+  usuarios            usuarios? @relation(fields: [usuario_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "enderecos_ibfk_1")
+  pedidos             pedidos[]
+
+  @@index([usuario_id], map: "usuario_id")
+}
+
+model estados {
+  id       Int        @id @default(autoincrement())
+  nome     String?    @db.VarChar(50)
+  produtos produtos[]
+}
+
+model generos {
+  id       Int        @id @default(autoincrement())
+  nome     String?    @db.VarChar(30)
+  produtos produtos[]
+}
+
+model marcas {
+  id       Int        @id @default(autoincrement())
+  nome     String?    @db.VarChar(50)
+  produtos produtos[]
+}
+
+model pagamentos {
+  id      Int       @id @default(autoincrement())
+  nome    String?   @db.VarChar(40)
+  pedidos pedidos[]
+}
+
+model pedidos {
+  id              Int               @id @default(autoincrement())
+  nome            String?           @db.VarChar(100)
+  uuid            String?           @db.VarChar(255)
+  endereco_ent_id Int?
+  usuario_id      Int?
+  data_compra     DateTime?         @db.DateTime(0)
+  status_id       Int?
+  valor           Float?            @db.Float
+  data_entrega    DateTime?         @db.Date
+  pagamento_id    Int?
+  enderecos       enderecos?        @relation(fields: [endereco_ent_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "pedidos_ibfk_1")
+  usuarios        usuarios?         @relation(fields: [usuario_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "pedidos_ibfk_2")
+  status_pedidos  status_pedidos?   @relation(fields: [status_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "pedidos_ibfk_3")
+  pagamentos      pagamentos?       @relation(fields: [pagamento_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "pedidos_ibfk_4")
+  produto_pedidos produto_pedidos[]
+
+  @@index([endereco_ent_id], map: "endereco_ent_id")
+  @@index([pagamento_id], map: "pagamento_id")
+  @@index([status_id], map: "status_id")
+  @@index([usuario_id], map: "usuario_id")
+}
+
+model produto_pedidos {
+  id         Int       @id @default(autoincrement())
+  produto_id Int?
+  pedido_id  Int?
+  produtos   produtos? @relation(fields: [produto_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "produto_pedidos_ibfk_1")
+  pedidos    pedidos?  @relation(fields: [pedido_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "produto_pedidos_ibfk_2")
+
+  @@index([pedido_id], map: "pedido_id")
+  @@index([produto_id], map: "produto_id")
+}
+
+model produtos {
+  id              Int               @id @default(autoincrement())
+  nome            String?           @db.VarChar(100)
+  marca_id        Int?
+  valor           Float?            @db.Float
+  secao_id        Int?
+  genero_id       Int?
+  estado_id       Int?
+  descricao       String?           @db.VarChar(255)
+  tamanho         String?           @db.VarChar(10)
+  avaliacoes      avaliacoes[]
+  produto_pedidos produto_pedidos[]
+  secaos          secaos?           @relation(fields: [secao_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "produtos_ibfk_1")
+  generos         generos?          @relation(fields: [genero_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "produtos_ibfk_2")
+  estados         estados?          @relation(fields: [estado_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "produtos_ibfk_3")
+  marcas          marcas?           @relation(fields: [marca_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "produtos_ibfk_4")
+
+  @@index([estado_id], map: "estado_id")
+  @@index([genero_id], map: "genero_id")
+  @@index([marca_id], map: "marca_id")
+  @@index([secao_id], map: "secao_id")
+}
+
+model promocoes {
+  id          Int       @id @default(autoincrement())
+  nome        String?   @db.VarChar(50)
+  percentagem Float?    @db.Float
+  inicio      DateTime? @db.DateTime(0)
+  termino     DateTime? @db.DateTime(0)
+}
+
+model secaos {
+  id         Int          @id @default(autoincrement())
+  nome       String?      @db.VarChar(50)
+  categorias categorias[]
+  produtos   produtos[]
+}
+
+model status_pedidos {
+  id      Int       @id @default(autoincrement())
+  nome    String?   @db.VarChar(50)
+  pedidos pedidos[]
 }
